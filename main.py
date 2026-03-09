@@ -39,7 +39,13 @@ def get_posts():
     return posts
 
 
-
+# creating a post retreiver base on id
+@app.get("/api/posts/{post_id}")
+def get_posts(post_id: int):
+    for post in posts:
+        if post.get("id") == post_id:
+            return post
+    return "Error no id exists"
 
 
 
