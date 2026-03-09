@@ -35,23 +35,31 @@ def home(request: Request):
     return templates.TemplateResponse(request, "home.html",{"posts": posts, "title":"N"})
 
 
-# creating a post retreiver base on id
-@app.get("/posts/{post_id}")
+
+@app.get("/posts/{post_id}", include_in_schema=False)
 def get_posts(post_id: int, request: Request):
     for post in posts:
         if post.get("id") == post_id:
             post_title = post['title'][:50] # get the first 50 characters of the title 
-
-            return templates.TemplateResponse(request, "post.html",{"posts": posts, "title":post_title})
+            return templates.TemplateResponse(request, "post.html",{"post": post, "title":post_title})
     raise HTTPException(status_code=404, detail=f"Post: '{post_id}' not found")
-    # return templates.TemplateResponse(request, "error.html")
-
 
 
 
 @app.get("/api/posts")
 def get_posts():
     return posts
+
+
+# creating a post retreiver base on id
+@app.get("/api/posts/{post_id}")
+def get_posts(post_id: int, request: Request):
+    for post in posts:
+        if post.get("id") == post_id:
+            return post
+        else:
+            raise HTTPException(status_code=404, detail=f"Post: '{post_id}' not found")
+    # return templates.TemplateResponse(request, "error.html")
 
 
 
