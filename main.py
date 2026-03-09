@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates #This is for accessing data from code to html templates, for loops, if else statements etc..
 
@@ -45,7 +45,9 @@ def get_posts(post_id: int, request: Request):
     for post in posts:
         if post.get("id") == post_id:
             return post
-    return templates.TemplateResponse(request, "error.html")
+        else:
+            raise HTTPException(status_code=404, detail=f"Post: '{post_id}' not found")
+    # return templates.TemplateResponse(request, "error.html")
 
 
 
