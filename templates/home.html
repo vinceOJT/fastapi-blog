@@ -22,7 +22,7 @@
 
             <h2 class="mb-2">
                 <a class="text-2xl font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                    href="#">
+                    href="{{ url_for('post_page', post_id=post.id ) }}">
                     {{ post.title }}
                 </a>
             </h2>

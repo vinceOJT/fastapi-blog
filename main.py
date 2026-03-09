@@ -37,7 +37,7 @@ def home(request: Request):
 
 
 @app.get("/posts/{post_id}", include_in_schema=False)
-def get_posts(post_id: int, request: Request):
+def post_page(post_id: int, request: Request):
     for post in posts:
         if post.get("id") == post_id:
             post_title = post['title'][:50] # get the first 50 characters of the title 
