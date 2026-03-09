@@ -6,6 +6,8 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StartletteHttpException
 
 
+from schemas import PostCreate, PostResponse
+
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory='static'), name='static')
@@ -49,14 +51,36 @@ def post_page(post_id: int, request: Request):
     raise HTTPException(status_code=404, detail=f"Post: '{post_id}' not found")
 
 
-
-@app.get("/api/posts")
+# By adding the response_model it will now validate each on of our posts
+@app.get("/api/posts", response_model=list[PostResponse])
 def get_posts():
     return posts
 
 
+@app.post("/api/posts",
+          response_model=PostResponse,
+          status_code=status.HTTP_201_CREATED,)
+def create_post(post: PostCreate):
+    new_id = max(p["id"] for p in posts) + 1 if posts else 1
+    new_post = {
+        "id": new_id,
+        "author": post.author,
+        "title": post.title,
+        "content": post.content,
+        "date_posted": "April 23, 2025",
+    }
+    posts.append(new_post)
+    return new_post
+ 
+
+
+
+
+
+
 # creating a post retreiver base on id
-@app.get("/api/posts/{post_id}")
+# The response model here is validates a single post 
+@app.get("/api/posts/{post_id}", response_model=PostResponse)
 def get_posts(post_id: int, request: Request):
     for post in posts:
         if post.get("id") == post_id:
