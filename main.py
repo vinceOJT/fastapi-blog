@@ -67,7 +67,8 @@ def get_posts(post_id: int, request: Request):
 
 
 
-
+# error handling for page errors
+# this is anything detected by starlette
 @app.exception_handler(StartletteHttpException)
 def generatl_http_exception_handler(request: Request, exception: StartletteHttpException):
     message = (
@@ -93,5 +94,26 @@ def generatl_http_exception_handler(request: Request, exception: StartletteHttpE
     )
 
 
+# error handling for validation
+# this is anything detected by request validation
+@app.exception_handler(RequestValidationError)
+def validation_exception_handler(request: Request, exception: RequestValidationError):
+    if request.url.path.startswith("/api"):
+        return JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            content={"detail", exception.errors()},
+        )
+
+    return templates.TemplateResponse(
+        request,
+        "error.html",
+        {
+            "status_code": status.HTTP_422_UNPROCESSABLE_CONTENT,
+            "title": status.HTTP_422_UNPROCESSABLE_CONTENT,
+            "message": "Invalid request, Check input"
+
+        },
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+    )
 
 
