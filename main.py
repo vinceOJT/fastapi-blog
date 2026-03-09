@@ -68,6 +68,30 @@ def get_posts(post_id: int, request: Request):
 
 
 
+@app.exception_handler(StartletteHttpException)
+def generatl_http_exception_handler(request: Request, exception: StartletteHttpException):
+    message = (
+        exception.detail
+        if exception.detail
+        else "An error occured check your Requests"
+    )
+
+    if request.url.path.startswith("/api"):
+        return JSONResponse(
+            status_code=exception.status_code,
+            content={"detail": message},
+        )
+    return templates.TemplateResponse(
+        request,
+        "error.html",
+        {
+            "status_code": exception.status_code,
+            "title": exception.status_code,
+            "message": message
+        },
+        status_code=exception.status_code,
+    )
+
 
 
 
