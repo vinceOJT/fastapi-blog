@@ -41,11 +41,11 @@ def get_posts():
 
 # creating a post retreiver base on id
 @app.get("/api/posts/{post_id}")
-def get_posts(post_id: int):
+def get_posts(post_id: int, request: Request):
     for post in posts:
         if post.get("id") == post_id:
             return post
-    return "Error no id exists"
+    return templates.TemplateResponse(request, "error.html")
 
 
 
