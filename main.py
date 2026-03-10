@@ -205,12 +205,12 @@ def create_post(post: PostCreate, db: Annotated[Session, Depends(get_db)]):
 # creating a post retreiver base on id, this is for single posts
 # The response model here is validates a single post
 @app.get("/api/posts/{post_id}", response_model=PostResponse)
-def get_posts(post_id: int, request: Request):
-    for post in posts:
-        if post.get("id") == post_id:
-            return post
-        else:
-            raise HTTPException(status_code=404, detail=f"Post: '{post_id}' not found")
+def get_post(post_id: int, db: Annotated[Session, Depends(get_db)]):
+    result = db.execute(select(models.Post).where(models.Post.id == post_id))
+    post = result.scalars().first()
+    if post:
+        return post
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
     # return templates.TemplateResponse(request, "error.html")
 
 
