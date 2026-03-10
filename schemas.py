@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field, EmailStr
 class UserBase(BaseModel):
     username: str = Field(min_length=1, max_length=50)
     email: EmailStr = Field(max_length=120)
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 # Create user
@@ -18,7 +19,7 @@ class UserResponse(UserBase):
     model_config = ConfigDict(from_attributes=True)
     id:int
     image_file: str | None
-    image_pat: str 
+    image_path: str 
 
 
 
@@ -30,6 +31,7 @@ class UserResponse(UserBase):
 class PostBase(BaseModel):
     title: str = Field(min_length=1, max_length=100)
     content: str = Field(min_length=1)
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 # This class requires the code at the top because it'll access it's parameters when creating

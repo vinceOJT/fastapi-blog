@@ -1,3 +1,7 @@
+# Type safety dependcy
+from typing import Annotated
+
+
 from fastapi import FastAPI, Request, HTTPException, status, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates #This is for accessing data from code to html templates, for loops, if else statements etc..
@@ -12,8 +16,6 @@ from database import Base, engine, get_db
 
 from schemas import PostCreate, PostResponse, UserCreate, UserResponse
 
-# Type safety dependcy
-from typing import Annotated
 
 
 # Creates the tables from models inherited from base if they dont already exist
@@ -121,7 +123,7 @@ def create_user(user: UserCreate, db: Annotated[Session, Depends(get_db)]):
     )
     db.add(new_user)
     db.commit()
-    db.refresh()
+    db.refresh(new_user)
 
     return new_user
 
