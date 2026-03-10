@@ -71,7 +71,7 @@ def post_page(post_id: int, request: Request):
 
 def create_user(user: UserCreate, db: Annotated[Session, Depends(get_db)]):
     result_username = db.execute(select(models.User).where(models.User.username == user.username)) # checks for simillar usernames
-    existing_user = result_username.scalars().first()
+    existing_user = result_username.scalars().first() # checks for the first existing username in dba
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -110,7 +110,8 @@ def create_user(user: UserCreate, db: Annotated[Session, Depends(get_db)]):
 
 @app.get("/api/users/posts/{user_id}", response_model=PostResponse)
 def get_user(user_id: int, request: Request, db: Annotated[Session, Depends(get_db)]):
-    result_id = db.execute(models.User).where(models.User.id == user_id)
+    # simillar logic when creating users
+    result_id = db.execute(select(models.User).where(models.User.id == user_id))
     existing_id = result_id.scalars().first()
     if existing_id:
         return existing_id
@@ -119,6 +120,19 @@ def get_user(user_id: int, request: Request, db: Annotated[Session, Depends(get_
         detail="User not found", 
     )
 
+@app.get("/api/users/{user_id}/posts", response_model=list[PostResponse])
+def get_user_posts(user_id: int, db: Annotated[Session, Depends(get_db)]):
+    result_id = db.execute(select(models.User).where(models.User.id == user_id))
+    existing_id = result_id.scalars().first()
+    if not existing_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    result = db.execute(select(models.Post).where(models.Post.user_id == user_id))
+    posts = result.scalars().all()
+    return posts
 
 
 
