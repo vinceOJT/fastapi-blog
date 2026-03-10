@@ -4,17 +4,17 @@
     <article class="bg-white dark:bg-gray-800 p-6 mb-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
         <div class="flex items-start gap-4">
             <img class="rounded-full flex-shrink-0 object-cover border border-gray-100 dark:border-gray-600"
-                 src="{{ url_for('static', path='profile_pics/default.jpg') }}"
-                 alt="{{ post.author }}'s profile picture"
+                 src="{{ post.author.image_path }}"
+                 alt="{{ post.author.username }}'s profile picture"
                  width="64"
                  height="64"
                  loading="lazy">
 
             <div class="flex-grow">
                 <div class="flex items-center gap-2 mb-2 text-sm">
-                    <a class="font-bold text-blue-600 dark:text-blue-400 hover:underline" href="#">{{ post.author }}</a>
+                    <a class="font-bold text-blue-600 dark:text-blue-400 hover:underline" href="#">{{ post.author.username }}</a>
                     <span class="text-gray-400">/</span>
-                    <span class="text-gray-500 dark:text-gray-400">{{ post.date_posted }}</span>
+                    <span class="text-gray-500 dark:text-gray-400">{{ post.date_posted.strftime('%B %d, %Y')  }}</span>
                 </div>
 
                 <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">{{ post.title }}</h2>
