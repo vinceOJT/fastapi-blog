@@ -36,7 +36,7 @@ class PostBase(BaseModel):
 
 # This class requires the code at the top because it'll access it's parameters when creating
 class PostCreate(PostBase):
-    user_id: id # TEMP TESTING
+    user_id: int # TEMP TESTING
 
 
 
