@@ -6,11 +6,11 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StartletteHttpException
 
 from sqlalchemy import select
-from sqlalchemy.orm import session
+from sqlalchemy.orm import Session
 import models
 from database import Base, engine, get_db
 
-from schemas import PostCreate, PostResponse
+from schemas import PostCreate, PostResponse, UserCreate, UserResponse
 
 # Type safety dependcy
 from typing import Annotated
@@ -27,26 +27,24 @@ app.mount("/media", StaticFiles(directory="media"), name="media")
 
 templates = Jinja2Templates(directory="templates") # To access the html templates
 
-posts: list[dict] = [{
-    'id':1,
-    'author': 'john hickles',
-    'weight': 69.9,
-    'title': 'about me',
-    'content': 'I live in 300 johnson st, at maywood pine groves',
-    'date_posted': '03/04/2023'
-},
-{
-    'id':2,
-    'author': 'mary hickles',
-    'weight': 64.9,
-    'title': 'about me too',
-    'content': 'I live in 200 johnson st, at maywood pine groves',
-    'date_posted': '03/04/2023'
+# posts: list[dict] = [{
+#     'id':1,
+#     'author': 'john hickles',
+#     'weight': 69.9,
+#     'title': 'about me',
+#     'content': 'I live in 300 johnson st, at maywood pine groves',
+#     'date_posted': '03/04/2023'
+# },
+# {
+#     'id':2,
+#     'author': 'mary hickles',
+#     'weight': 64.9,
+#     'title': 'about me too',
+#     'content': 'I live in 200 johnson st, at maywood pine groves',
+#     'date_posted': '03/04/2023'
 
-}
-
-
-]
+# }
+# ]
 
 @app.get("/", include_in_schema=False, name='home')
 @app.get("/posts", include_in_schema=False, name='posts')
@@ -66,6 +64,13 @@ def post_page(post_id: int, request: Request):
 
 
 
+
+@app.post("/api/users",
+          response_model=UserResponse,
+          status_code=status.HTTP_201_CREATED,)
+
+def creaet_user(user: UserCreate, db: Annotated[Session, Depends(get_db)]):
+    pass
 
 
 
