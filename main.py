@@ -69,9 +69,9 @@ def post_page(post_id: int, request: Request):
           response_model=UserResponse,
           status_code=status.HTTP_201_CREATED,)
 
-def creaet_user(user: UserCreate, db: Annotated[Session, Depends(get_db)]):
+def create_user(user: UserCreate, db: Annotated[Session, Depends(get_db)]):
     result_username = db.execute(select(models.User).where(models.User.username == user.username)) # checks for simillar usernames
-    existing_user = result_username.scalar().first()
+    existing_user = result_username.scalars().first()
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -79,7 +79,7 @@ def creaet_user(user: UserCreate, db: Annotated[Session, Depends(get_db)]):
         )
 
     result_email = db.execute(select(models.User).where(models.User.email == user.email)) # checks for simillar emails
-    existing_email = result_email.scalar().first()
+    existing_email = result_email.scalars().first()
     if existing_email:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -95,6 +95,29 @@ def creaet_user(user: UserCreate, db: Annotated[Session, Depends(get_db)]):
 
     return new_user
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+@app.get("/api/users/posts/{user_id}", response_model=PostResponse)
+def get_user(user_id: int, request: Request, db: Annotated[Session, Depends(get_db)]):
+    result_id = db.execute(models.User).where(models.User.id == user_id)
+    existing_id = result_id.scalars().first()
+    if existing_id:
+        return existing_id
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="User not found", 
+    )
 
 
 
