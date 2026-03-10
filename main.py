@@ -46,11 +46,16 @@ templates = Jinja2Templates(directory="templates") # To access the html template
 # }
 # ]
 
-@app.get("/", include_in_schema=False, name='home')
-@app.get("/posts", include_in_schema=False, name='posts')
-def home(request: Request):
-    return templates.TemplateResponse(request, "home.html",{"posts": posts, "title":"N"})
-
+@app.get("/", include_in_schema=False, name="home")
+@app.get("/posts", include_in_schema=False, name="posts")
+def home(request: Request, db: Annotated[Session, Depends(get_db)]):
+    result = db.execute(select(models.Post))
+    posts = result.scalars().all()
+    return templates.TemplateResponse(
+        request,
+        "home.html",
+        {"posts": posts, "title": "Home"},
+    )
 
 
 @app.get("/posts/{post_id}", include_in_schema=False)
