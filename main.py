@@ -70,12 +70,30 @@ def post_page(post_id: int, request: Request):
           status_code=status.HTTP_201_CREATED,)
 
 def creaet_user(user: UserCreate, db: Annotated[Session, Depends(get_db)]):
-    pass
+    result_username = db.execute(select(models.User).where(models.User.username == user.username)) # checks for simillar usernames
+    existing_user = result_username.scalar().first()
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This username already exists",
+        )
 
+    result_email = db.execute(select(models.User).where(models.User.email == user.email)) # checks for simillar emails
+    existing_email = result_email.scalar().first()
+    if existing_email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This email already exists",
+        )
+    new_user = models.User(
+        username=user.username,
+        email=user.email,
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh()
 
-
-
-
+    return new_user
 
 
 
