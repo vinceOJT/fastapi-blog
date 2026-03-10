@@ -168,8 +168,11 @@ def get_user_posts(user_id: int, db: Annotated[Session, Depends(get_db)]):
 
 # By adding the response_model it will now validate each on of our posts
 @app.get("/api/posts", response_model=list[PostResponse])
-def get_posts():
+def get_posts(db: Annotated[Session, Depends(get_db)]):
+    result = db.execute(select(models.Post))
+    posts = result.scalars().all()
     return posts
+    
 @app.post("/api/posts",
           response_model=PostResponse,
           status_code=status.HTTP_201_CREATED,)
