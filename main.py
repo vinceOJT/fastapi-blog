@@ -16,9 +16,15 @@ from schemas import PostCreate, PostResponse
 from typing import Annotated
 
 
+# Creates the tables from models inherited from base if they dont already exist
+Base.metadata.create_all(bind=engine)
+
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory='static'), name='static')
+app.mount("/media", StaticFiles(directory="media"), name="media")
+
+
 templates = Jinja2Templates(directory="templates") # To access the html templates
 
 posts: list[dict] = [{
