@@ -59,13 +59,17 @@ def home(request: Request, db: Annotated[Session, Depends(get_db)]):
 
 
 @app.get("/posts/{post_id}", include_in_schema=False)
-def post_page(post_id: int, request: Request):
-    for post in posts:
-        if post.get("id") == post_id:
-            post_title = post['title'][:50] # get the first 50 characters of the title 
-            return templates.TemplateResponse(request, "post.html",{"post": post, "title":post_title})
-    raise HTTPException(status_code=404, detail=f"Post: '{post_id}' not found")
-
+def post_page(request: Request, post_id: int, db: Annotated[Session, Depends(get_db)]):
+    result = db.execute(select(models.Post).where(models.Post.id == post_id))
+    post = result.scalars().first()
+    if post:
+        title = post.title[:50]
+        return templates.TemplateResponse(
+            request,
+            "post.html",
+            {"post": post, "title": title},
+        )
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
 
 
 
