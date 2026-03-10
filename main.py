@@ -140,31 +140,30 @@ def create_user(user: UserCreate, db: Annotated[Session, Depends(get_db)]):
 
 
 
-@app.get("/api/users/posts/{user_id}", response_model=PostResponse)
-def get_user(user_id: int, request: Request, db: Annotated[Session, Depends(get_db)]):
-    # simillar logic when creating users
-    result_id = db.execute(select(models.User).where(models.User.id == user_id))
-    existing_id = result_id.scalars().first()
-    if existing_id:
-        return existing_id
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="User not found", 
+@app.get("/api/users/{user_id}", response_model=UserResponse)
+def get_user(user_id: int, db: Annotated[Session, Depends(get_db)]):
+    result = db.execute(
+        select(models.User).where(models.User.id == user_id),
     )
+    user = result.scalars().first()
+    if user:
+        return user
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
 
 @app.get("/api/users/{user_id}/posts", response_model=list[PostResponse])
 def get_user_posts(user_id: int, db: Annotated[Session, Depends(get_db)]):
-    result_id = db.execute(select(models.User).where(models.User.id == user_id))
-    existing_id = result_id.scalars().first()
-    if not existing_id:
+    result = db.execute(select(models.User).where(models.User.id == user_id))
+    user = result.scalars().first()
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
         )
-
     result = db.execute(select(models.Post).where(models.Post.user_id == user_id))
     posts = result.scalars().all()
     return posts
+
 
 
 
