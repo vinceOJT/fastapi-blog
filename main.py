@@ -1,12 +1,20 @@
-from fastapi import FastAPI, Request, HTTPException, status
+from fastapi import FastAPI, Request, HTTPException, status, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates #This is for accessing data from code to html templates, for loops, if else statements etc..
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StartletteHttpException
 
+from sqlalchemy import select
+from sqlalchemy.orm import session
+import models
+from database import Base, engine, get_db
 
 from schemas import PostCreate, PostResponse
+
+# Type safety dependcy
+from typing import Annotated
+
 
 
 app = FastAPI()
