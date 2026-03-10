@@ -142,10 +142,10 @@ def create_user(user: UserCreate, db: Annotated[Session, Depends(get_db)]):
 
 @app.get("/api/users/{user_id}", response_model=UserResponse)
 def get_user(user_id: int, db: Annotated[Session, Depends(get_db)]):
-    result = db.execute(
+    result_user_id = db.execute(
         select(models.User).where(models.User.id == user_id),
     )
-    user = result.scalars().first()
+    user = result_user_id.scalars().first()
     if user:
         return user
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
@@ -153,8 +153,8 @@ def get_user(user_id: int, db: Annotated[Session, Depends(get_db)]):
 
 @app.get("/api/users/{user_id}/posts", response_model=list[PostResponse])
 def get_user_posts(user_id: int, db: Annotated[Session, Depends(get_db)]):
-    result = db.execute(select(models.User).where(models.User.id == user_id))
-    user = result.scalars().first()
+    result_user_post = db.execute(select(models.User).where(models.User.id == user_id))
+    user = result_user_post.scalars().first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
