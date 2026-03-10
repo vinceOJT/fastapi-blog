@@ -11,8 +11,7 @@ from schemas import PostCreate, PostResponse
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory='static'), name='static')
-
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="templates") # To access the html templates
 
 posts: list[dict] = [{
     'id':1,
@@ -51,12 +50,22 @@ def post_page(post_id: int, request: Request):
     raise HTTPException(status_code=404, detail=f"Post: '{post_id}' not found")
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # By adding the response_model it will now validate each on of our posts
 @app.get("/api/posts", response_model=list[PostResponse])
 def get_posts():
     return posts
-
-
 @app.post("/api/posts",
           response_model=PostResponse,
           status_code=status.HTTP_201_CREATED,)
@@ -71,15 +80,8 @@ def create_post(post: PostCreate):
     }
     posts.append(new_post)
     return new_post
- 
-
-
-
-
-
-
-# creating a post retreiver base on id
-# The response model here is validates a single post 
+# creating a post retreiver base on id, this is for single posts
+# The response model here is validates a single post
 @app.get("/api/posts/{post_id}", response_model=PostResponse)
 def get_posts(post_id: int, request: Request):
     for post in posts:
@@ -88,6 +90,21 @@ def get_posts(post_id: int, request: Request):
         else:
             raise HTTPException(status_code=404, detail=f"Post: '{post_id}' not found")
     # return templates.TemplateResponse(request, "error.html")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -112,7 +129,7 @@ def generatl_http_exception_handler(request: Request, exception: StartletteHttpE
         {
             "status_code": exception.status_code,
             "title": exception.status_code,
-            "message": message
+            "message": message,
         },
         status_code=exception.status_code,
     )
@@ -127,7 +144,6 @@ def validation_exception_handler(request: Request, exception: RequestValidationE
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             content={"detail", exception.errors()},
         )
-
     return templates.TemplateResponse(
         request,
         "error.html",
