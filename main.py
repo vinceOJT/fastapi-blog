@@ -206,8 +206,8 @@ def create_post(post: PostCreate, db: Annotated[Session, Depends(get_db)]):
 # The response model here is validates a single post
 @app.get("/api/posts/{post_id}", response_model=PostResponse)
 def get_post(post_id: int, db: Annotated[Session, Depends(get_db)]):
-    result = db.execute(select(models.Post).where(models.Post.id == post_id))
-    post = result.scalars().first()
+    result_post_id = db.execute(select(models.Post).where(models.Post.id == post_id))
+    post = result_post_id.scalars().first()
     if post:
         return post
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
