@@ -1,7 +1,6 @@
 # Type safety dependcy
 from typing import Annotated
 
-
 from fastapi import FastAPI, Request, HTTPException, status, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates #This is for accessing data from code to html templates, for loops, if else statements etc..
@@ -14,39 +13,21 @@ from sqlalchemy.orm import Session
 import models
 from database import Base, engine, get_db
 
+
 from schemas import PostCreate, PostResponse, UserCreate, UserResponse
 
 
 
 # Creates the tables from models inherited from base if they dont already exist
 Base.metadata.create_all(bind=engine)
-
-
 app = FastAPI()
 app.mount("/static", StaticFiles(directory='static'), name='static')
 app.mount("/media", StaticFiles(directory="media"), name="media")
-
-
 templates = Jinja2Templates(directory="templates") # To access the html templates
 
-# posts: list[dict] = [{
-#     'id':1,
-#     'author': 'john hickles',
-#     'weight': 69.9,
-#     'title': 'about me',
-#     'content': 'I live in 300 johnson st, at maywood pine groves',
-#     'date_posted': '03/04/2023'
-# },
-# {
-#     'id':2,
-#     'author': 'mary hickles',
-#     'weight': 64.9,
-#     'title': 'about me too',
-#     'content': 'I live in 200 johnson st, at maywood pine groves',
-#     'date_posted': '03/04/2023'
 
-# }
-# ]
+
+
 
 @app.get("/", include_in_schema=False, name="home")
 @app.get("/posts", include_in_schema=False, name="posts")
@@ -58,6 +39,10 @@ def home(request: Request, db: Annotated[Session, Depends(get_db)]):
         "home.html",
         {"posts": posts, "title": "Home"},
     )
+
+
+
+
 
 
 @app.get("/posts/{post_id}", include_in_schema=False)
@@ -73,6 +58,10 @@ def post_page(request: Request, post_id: int, db: Annotated[Session, Depends(get
         )
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
  
+
+
+
+
 @app.get("/users/{user_id}/posts", include_in_schema=False, name="user_posts")
 def user_posts_page(
     request: Request,
@@ -94,8 +83,6 @@ def user_posts_page(
         "user_posts.html",
         {"posts": posts, "user": user, "title": f"{user.username}'s Posts"},
     )
-
-
 
 @app.post("/api/users",
           response_model=UserResponse,
@@ -140,6 +127,9 @@ def create_user(user: UserCreate, db: Annotated[Session, Depends(get_db)]):
 
 
 
+
+
+
 @app.get("/api/users/{user_id}", response_model=UserResponse)
 def get_user(user_id: int, db: Annotated[Session, Depends(get_db)]):
     result_user_id = db.execute(
@@ -163,6 +153,10 @@ def get_user_posts(user_id: int, db: Annotated[Session, Depends(get_db)]):
     result = db.execute(select(models.Post).where(models.Post.user_id == user_id))
     posts = result.scalars().all()
     return posts
+
+
+
+
 
 
 
@@ -202,7 +196,6 @@ def create_post(post: PostCreate, db: Annotated[Session, Depends(get_db)]):
     return new_post
 
 
-
 # creating a post retreiver base on id, this is for single posts
 # The response model here is validates a single post
 @app.get("/api/posts/{post_id}", response_model=PostResponse)
@@ -213,10 +206,6 @@ def get_post(post_id: int, db: Annotated[Session, Depends(get_db)]):
         return post
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
     # return templates.TemplateResponse(request, "error.html")
-
-
-
-
 
 
 
