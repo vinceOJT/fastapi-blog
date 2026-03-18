@@ -19,7 +19,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from auth import create_access_token, hash_password, oauth2_scheme, verify_access_token, verify_password
 
-from config import settings
+from config import se
 
 router = APIRouter()
 
@@ -32,7 +32,7 @@ router = APIRouter()
           status_code=status.HTTP_201_CREATED,)
 
 async def create_user(user: UserCreate, db: Annotated[AsyncSession, Depends(get_db)]):
-    result_username = await db.execute(select(models.User).where(models.User.username == user.username)) # checks for simillar usernames
+    result_username = await db.execute(select(func.lower(models.User).where(models.User.username) == user.username.lower())) # checks for simillar usernames
     existing_user = result_username.scalars().first() # checks for the first existing username in dba
     if existing_user:
         raise HTTPException(
@@ -40,7 +40,7 @@ async def create_user(user: UserCreate, db: Annotated[AsyncSession, Depends(get_
             detail="This username already exists",
         )
 
-    result_email = await db.execute(select(models.User).where(models.User.email == user.email)) # checks for simillar emails
+    result_email = await db.execute(select(func.lower(models.User).where(models.User.email) == user.email.lower())) # checks for simillar emails
     existing_email = result_email.scalars().first()
     if existing_email:
         raise HTTPException(
