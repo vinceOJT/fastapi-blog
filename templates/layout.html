@@ -294,17 +294,20 @@
 
                     hideModal("createPostModal");
                     showModal("successModal");
-
-                    // Clear form
                     createForm.reset();
 
-                    // Reload page after modal is hidden to show new post
-                    document.getElementById("successModal")
-                        .addEventListener("click", (e) => {
-                            if (e.target.tagName === "BUTTON") {
-                                window.location.reload();
-                            }
-                        }, { once: true });
+                    // BEFORE (broken) - listener added but reload never triggers reliably
+                    document.getElementById("successCloseBtn").addEventListener(
+                        "click",
+                        () => window.location.reload(),
+                        { once: true }
+                    );
+
+                    // AFTER - just reload immediately after a short delay so user sees the success message
+                    setTimeout(() => {
+                        hideModal("successModal");
+                        window.location.reload();
+                    }, 1500);
                 } else {
                     const error = await response.json();
                     document.getElementById("errorMessage").textContent =

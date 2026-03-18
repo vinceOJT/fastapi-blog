@@ -32,7 +32,9 @@ router = APIRouter()
           status_code=status.HTTP_201_CREATED,)
 
 async def create_user(user: UserCreate, db: Annotated[AsyncSession, Depends(get_db)]):
-    result_username = await db.execute(select(func.lower(models.User).where(models.User.username) == user.username.lower())) # checks for simillar usernames
+    result_username = await db.execute(
+        select(models.User).where(func.lower(models.User.username) == user.username.lower()))
+ # checks for simillar usernames
     existing_user = result_username.scalars().first() # checks for the first existing username in dba
     if existing_user:
         raise HTTPException(
@@ -40,7 +42,8 @@ async def create_user(user: UserCreate, db: Annotated[AsyncSession, Depends(get_
             detail="This username already exists",
         )
 
-    result_email = await db.execute(select(func.lower(models.User).where(models.User.email) == user.email.lower())) # checks for simillar emails
+    result_email = await db.execute(
+                select(models.User).where(func.lower(models.User.email) == user.email.lower())) # checks for simillar emails
     existing_email = result_email.scalars().first()
     if existing_email:
         raise HTTPException(
@@ -178,7 +181,7 @@ async def update_user(user_id: int, user_update:UserUpdate, db: Annotated[AsyncS
     )
     # Checks for similar usernames
     if user_update.username is not None and user_update.username.lower() != user.username.lower():
-        result_same_username = db.execute(
+        result_same_username = await db.execute(
         select(models.User).where(func.lower(models.User.username) == user_update.username.lower())
         )
         existing_username = result_same_username.scalars().first()
@@ -190,7 +193,7 @@ async def update_user(user_id: int, user_update:UserUpdate, db: Annotated[AsyncS
 
     # Checks for similar emails
     if user_update.email is not None and user_update.email.lower()  != user.email.lower():
-        result_same_email = db.execute(
+        result_same_email = await db.execute(
         select(models.User).where(func.lower(models.User.email )== user_update.email.lower())
         )
         existing_email = result_same_email.scalars().first()

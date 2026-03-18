@@ -21,7 +21,7 @@ class UserUpdate(BaseModel):
 
 
 class Token(BaseModel):
-    access_tkn: str
+    access_token: str
     token_type: str
 
 
