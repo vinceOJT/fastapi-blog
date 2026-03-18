@@ -5,24 +5,48 @@ from pydantic import BaseModel, ConfigDict, Field, EmailStr
 
 # Creating a user with required information
 class UserBase(BaseModel):
-    username: str = Field(min_length=1, max_length=50)
+    username: str = Field(min_length=1, max_length=100)
     email: EmailStr = Field(max_length=120)
-    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 # Create user
 class UserCreate(UserBase):
-    pass
+    password:str = Field(min_length=8,)
+
+
+class UserUpdate(BaseModel):
+    username: str | None = Field(default=None, min_length=1, max_length=100)
+    email: EmailStr = Field(default=None, max_length=120)
+    image_file: str | None = Field(default=None, min_length=1, max_length=200)
+
+
+class Token(BaseModel):
+    access_tkn: str
+    token_type: str
+
+
+
 
 # Response when create user
-class UserResponse(UserBase):
+class UserPublic(UserBase):
     model_config = ConfigDict(from_attributes=True)
+
+
     id:int
+    username:str
     image_file: str | None
     image_path: str 
 
+class UserPrivate(UserPublic):
+    email: EmailStr
 
 
+
+
+
+
+
+ 
 
 
 
@@ -31,14 +55,16 @@ class UserResponse(UserBase):
 class PostBase(BaseModel):
     title: str = Field(min_length=1, max_length=100)
     content: str = Field(min_length=1)
-    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 # This class requires the code at the top because it'll access it's parameters when creating
 class PostCreate(PostBase):
     user_id: int # TEMP TESTING
+        
 
-
+class PostUpdate(BaseModel):
+    title: str | None = Field(default=None, min_length=1, max_length=100)
+    content: str | None = Field(default=None, min_length=1)
 
 # This will generate fields by the system and not by the client 
 class PostResponse(PostBase):
@@ -47,7 +73,7 @@ class PostResponse(PostBase):
     id:int
     user_id: int
     date_posted: datetime
-    author: UserResponse
+    author: UserPublic
 
 
 

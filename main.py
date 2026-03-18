@@ -1,44 +1,101 @@
+from contextlib import asynccontextmanager
+
+
 # Type safety dependcy
 from typing import Annotated
 
+
+from fastapi.exception_handlers import http_exception_handler, request_validation_exception_handler
 from fastapi import FastAPI, Request, HTTPException, status, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates #This is for accessing data from code to html templates, for loops, if else statements etc..
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+# from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StartletteHttpException
 
+
 from sqlalchemy import select
-from sqlalchemy.orm import Session
-import models
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
+
 from database import Base, engine, get_db
+import models
 
 
-from schemas import PostCreate, PostResponse, UserCreate, UserResponse
+from routers import posts, users
+
+from schemas import PostResponse 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 # Creates the tables from models inherited from base if they dont already exist
-Base.metadata.create_all(bind=engine)
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    # Startup
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+    # Shutdown
+    await engine.dispose()
+
+app = FastAPI(lifespan=lifespan)
 app.mount("/static", StaticFiles(directory='static'), name='static')
 app.mount("/media", StaticFiles(directory="media"), name="media")
 templates = Jinja2Templates(directory="templates") # To access the html templates
 
+# Every api route ("") or (/user_id) or (/post_id), is being appended here
+# Becoming a fully functional api route
+ 
+app.include_router(users.router, prefix="/api/users", tags=["users"])
+app.include_router(posts.router, prefix="/api/posts", tags=["posts"])
 
 
 
-
+# Landing page
 @app.get("/", include_in_schema=False, name="home")
 @app.get("/posts", include_in_schema=False, name="posts")
-def home(request: Request, db: Annotated[Session, Depends(get_db)]):
-    result = db.execute(select(models.Post))
+async def home(request: Request, db: Annotated[AsyncSession, Depends(get_db)]):
+    result =await db.execute(select(models.Post)
+                                #  Switched from lazy loading to eager loading
+                                # Lazy is when data is fetched 1 by 1 when neede, eager fetches everything even uneeded data
+                              .options(selectinload(models.Post.author))
+                               .order_by(models.Post.date_posted.desc()),
+                             )
     posts = result.scalars().all()
     return templates.TemplateResponse(
         request,
         "home.html",
         {"posts": posts, "title": "Home"},
     )
+ 
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -46,8 +103,10 @@ def home(request: Request, db: Annotated[Session, Depends(get_db)]):
 
 
 @app.get("/posts/{post_id}", include_in_schema=False)
-def post_page(request: Request, post_id: int, db: Annotated[Session, Depends(get_db)]):
-    result_post_id = db.execute(select(models.Post).where(models.Post.id == post_id))
+async def post_page(request: Request, post_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
+    result_post_id =await db.execute(select(models.Post)
+                .options(selectinload(models.Post.author))
+                .where(models.Post.id == post_id))
     post = result_post_id.scalars().first()
     if post:
         title = post.title[:50]
@@ -62,13 +121,31 @@ def post_page(request: Request, post_id: int, db: Annotated[Session, Depends(get
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @app.get("/users/{user_id}/posts", include_in_schema=False, name="user_posts")
-def user_posts_page(
+async def user_posts_page(
     request: Request,
     user_id: int,
-    db: Annotated[Session, Depends(get_db)],
+    db: Annotated[AsyncSession, Depends(get_db)],
 ):
-    result_user_id = db.execute(select(models.User).where(models.User.id == user_id))
+    result_user_id = await db.execute(select(models.User) # does not need a selectinload because its not accessing a relationships in User
+                                 .where(models.User.id == user_id))
     user = result_user_id.scalars().first()
     if not user:
         raise HTTPException(
@@ -76,43 +153,15 @@ def user_posts_page(
             detail="User not found",
         )
 
-    result = db.execute(select(models.Post).where(models.Post.user_id == user_id))
+    result = await db.execute(select(models.Post).where(models.Post.user_id == user_id)
+                              .order_by(models.Post.date_posted.desc()))
     posts = result.scalars().all()
     return templates.TemplateResponse(
         request,
-        "user_posts.html",
+        "user_post.html",
         {"posts": posts, "user": user, "title": f"{user.username}'s Posts"},
     )
 
-@app.post("/api/users",
-          response_model=UserResponse,
-          status_code=status.HTTP_201_CREATED,)
-
-def create_user(user: UserCreate, db: Annotated[Session, Depends(get_db)]):
-    result_username = db.execute(select(models.User).where(models.User.username == user.username)) # checks for simillar usernames
-    existing_user = result_username.scalars().first() # checks for the first existing username in dba
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="This username already exists",
-        )
-
-    result_email = db.execute(select(models.User).where(models.User.email == user.email)) # checks for simillar emails
-    existing_email = result_email.scalars().first()
-    if existing_email:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="This email already exists",
-        )
-    new_user = models.User(
-        username=user.username,
-        email=user.email,
-    )
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-
-    return new_user
 
 
 
@@ -130,29 +179,6 @@ def create_user(user: UserCreate, db: Annotated[Session, Depends(get_db)]):
 
 
 
-@app.get("/api/users/{user_id}", response_model=UserResponse)
-def get_user(user_id: int, db: Annotated[Session, Depends(get_db)]):
-    result_user_id = db.execute(
-        select(models.User).where(models.User.id == user_id),
-    )
-    user = result_user_id.scalars().first()
-    if user:
-        return user
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-
-
-@app.get("/api/users/{user_id}/posts", response_model=list[PostResponse])
-def get_user_posts(user_id: int, db: Annotated[Session, Depends(get_db)]):
-    result_user_post = db.execute(select(models.User).where(models.User.id == user_id))
-    user = result_user_post.scalars().first()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found",
-        )
-    result = db.execute(select(models.Post).where(models.Post.user_id == user_id))
-    posts = result.scalars().all()
-    return posts
 
 
 
@@ -160,52 +186,6 @@ def get_user_posts(user_id: int, db: Annotated[Session, Depends(get_db)]):
 
 
 
-
-# By adding the response_model it will now validate each on of our posts
-@app.get("/api/posts", response_model=list[PostResponse])
-def get_posts(db: Annotated[Session, Depends(get_db)]):
-    result_post = db.execute(select(models.Post))
-    posts = result_post.scalars().all()
-    return posts
-    
-@app.post("/api/posts",
-          response_model=PostResponse,
-          status_code=status.HTTP_201_CREATED,)
-@app.post(
-    "/api/posts",
-    response_model=PostResponse,
-    status_code=status.HTTP_201_CREATED,
-)
-def create_post(post: PostCreate, db: Annotated[Session, Depends(get_db)]):
-    result_user_id = db.execute(select(models.User).where(models.User.id == post.user_id))
-    user = result_user_id.scalars().first()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found",
-        )
-
-    new_post = models.Post(
-        title=post.title,
-        content=post.content,
-        user_id=post.user_id,
-    )
-    db.add(new_post)
-    db.commit()
-    db.refresh(new_post)
-    return new_post
-
-
-# creating a post retreiver base on id, this is for single posts
-# The response model here is validates a single post
-@app.get("/api/posts/{post_id}", response_model=PostResponse)
-def get_post(post_id: int, db: Annotated[Session, Depends(get_db)]):
-    result_post_id = db.execute(select(models.Post).where(models.Post.id == post_id))
-    post = result_post_id.scalars().first()
-    if post:
-        return post
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
-    # return templates.TemplateResponse(request, "error.html")
 
 
 
@@ -223,18 +203,16 @@ def get_post(post_id: int, db: Annotated[Session, Depends(get_db)]):
 # error handling for page errors
 # this is anything detected by starlette
 @app.exception_handler(StartletteHttpException)
-def generatl_http_exception_handler(request: Request, exception: StartletteHttpException):
-    message = (
-        exception.detail
-        if exception.detail
-        else "An error occured check your Requests"
-    )
+async def generatl_http_exception_handler(request: Request, exception: StartletteHttpException):
 
     if request.url.path.startswith("/api"):
-        return JSONResponse(
-            status_code=exception.status_code,
-            content={"detail": message},
-        )
+        return await http_exception_handler(request, exception)
+    message = (
+    exception.detail
+    if exception.detail
+    else "An error occured check your Requests"
+)
+
     return templates.TemplateResponse(
         request,
         "error.html",
@@ -250,12 +228,10 @@ def generatl_http_exception_handler(request: Request, exception: StartletteHttpE
 # error handling for validation
 # this is anything detected by request validation
 @app.exception_handler(RequestValidationError)
-def validation_exception_handler(request: Request, exception: RequestValidationError):
+async def validation_exception_handler(request: Request, exception: RequestValidationError):
     if request.url.path.startswith("/api"):
-        return JSONResponse(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            content={"detail", exception.errors()},
-        )
+        return await request_validation_exception_handler(request, exception)
+
     return templates.TemplateResponse(
         request,
         "error.html",

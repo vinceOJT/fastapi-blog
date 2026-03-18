@@ -1,0 +1,397 @@
+## New Post Modal Button for layout.html
+<!-- NOTE: Once auth is set up, this button will only be visible when logged in -->
+<button class="border border-white text-white px-4 py-2 rounded-md hover:bg-white hover:text-gray-900 transition-colors duration-200 mb-2 md:mb-0 md:mr-2"
+        type="button"
+        data-modal-target="createPostModal"
+        onclick="document.getElementById('createPostModal').classList.remove('hidden')">
+  New Post
+</button>
+<!-- NOTE: Once auth is set up, this button will only be visible when logged in -->
+
+
+
+## Create Post Modal
+<!-- Create Post Modal -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 hidden"
+     id="createPostModal">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg mx-4">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+      <h5 class="text-lg font-semibold text-gray-900 dark:text-white">New Post</h5>
+      <button type="button"
+              class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-xl leading-none"
+              onclick="document.getElementById('createPostModal').classList.add('hidden')"
+              aria-label="Close">&times;</button>
+    </div>
+    <form id="createPostForm">
+      <div class="px-6 py-4 space-y-4">
+        <div>
+          <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+          <input type="text"
+                 class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                 id="title" name="title" required>
+        </div>
+        <div>
+          <label for="content" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content</label>
+          <textarea class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    id="content" name="content" rows="5" required></textarea>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+        <button type="button"
+                class="px-4 py-2 text-sm rounded-md border border-gray-400 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                onclick="document.getElementById('createPostModal').classList.add('hidden')">
+          Cancel
+        </button>
+        <button type="submit"
+                class="px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+          Post
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
+## Success and Error Modals
+<!-- Success Modal -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 hidden"
+     id="successModal">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg mx-4">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-green-600 rounded-t-lg">
+      <h5 class="text-lg font-semibold text-white">Success</h5>
+      <button type="button"
+              class="text-white hover:text-green-200 text-xl leading-none"
+              onclick="document.getElementById('successModal').classList.add('hidden')"
+              aria-label="Close">&times;</button>
+    </div>
+    <div class="px-6 py-4">
+      <p id="successMessage" class="text-base text-gray-800 dark:text-gray-200"></p>
+    </div>
+    <div class="flex justify-end px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+      <button type="button"
+              class="px-4 py-2 text-sm rounded-md bg-gray-500 text-white hover:bg-gray-600 transition-colors"
+              onclick="document.getElementById('successModal').classList.add('hidden')">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Error Modal -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 hidden"
+     id="errorModal">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg mx-4">
+    <div class="flex items-center justify-between px-6 py-4 bg-red-600 rounded-t-lg">
+      <h5 class="text-lg font-semibold text-white">Error</h5>
+      <button type="button"
+              class="text-white hover:text-red-200 text-xl leading-none"
+              onclick="document.getElementById('errorModal').classList.add('hidden')"
+              aria-label="Close">&times;</button>
+    </div>
+    <div class="px-6 py-4">
+      <p id="errorMessage" class="text-base text-gray-800 dark:text-gray-200"></p>
+    </div>
+    <div class="flex justify-end px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+      <button type="button"
+              class="px-4 py-2 text-sm rounded-md bg-gray-500 text-white hover:bg-gray-600 transition-colors"
+              onclick="document.getElementById('errorModal').classList.add('hidden')">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+
+
+## utils.js
+// Error message extraction from API responses
+export function getErrorMessage(error) {
+  if (typeof error.detail === "string") {
+    return error.detail;
+  } else if (Array.isArray(error.detail)) {
+    return error.detail.map((err) => err.msg).join(". ");
+  }
+  return "An error occurred. Please try again.";
+}
+
+// Show a Tailwind modal by ID (removes 'hidden' class)
+export function showModal(modalId) {
+  document.getElementById(modalId).classList.remove("hidden");
+}
+
+// Hide a Tailwind modal by ID (adds 'hidden' class)
+export function hideModal(modalId) {
+  document.getElementById(modalId).classList.add("hidden");
+}
+
+
+
+## Create Post JavaScript
+<!-- Create Post Form Handler -->
+<script type="module">
+  import {
+    getErrorMessage,
+    hideModal,
+    showModal,
+  } from "/static/js/utils.js";
+
+  const createForm = document.getElementById("createPostForm");
+
+  createForm.addEventListener("submit", async (event) => {
+    // Stop default form submission - we'll handle it with JavaScript
+    event.preventDefault();
+
+    // Gather form values into a plain object {title: "...", content: "..."}
+    const formData = new FormData(createForm);
+    const postData = Object.fromEntries(formData.entries());
+
+    // TEMPORARY - hardcoded until authorization (Tutorial 11)
+    postData.user_id = 1;
+
+    try {
+      // POST to our API as JSON
+      const response = await fetch("/api/posts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(postData),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        document.getElementById("successMessage").textContent =
+          `Post "${data.title}" created successfully!`;
+
+        hideModal("createPostModal");
+        showModal("successModal");
+
+        // Clear form
+        createForm.reset();
+
+        // Reload page after modal is hidden to show new post
+        document
+          .getElementById("successModal")
+          .querySelector("button[onclick*='hidden']")
+          .addEventListener(
+            "click",
+            () => {
+              window.location.reload();
+            },
+            { once: true },
+          );
+      } else {
+        const error = await response.json();
+        document.getElementById("errorMessage").textContent =
+          getErrorMessage(error);
+
+        hideModal("createPostModal");
+        showModal("errorModal");
+      }
+    } catch (error) {
+      document.getElementById("errorMessage").textContent =
+        "Network error. Please check your connection and try again.";
+      showModal("errorModal");
+    }
+  });
+</script>
+
+{% block scripts %}
+{% endblock scripts %}
+
+
+
+## Edit/Delete Single Post
+<!-- Only show edit/delete options if user_id is 1 (TEMPORARY - until authentication) -->
+{% if post.user_id == 1 %}
+  <div class="post-actions mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 flex gap-2">
+    <button type="button"
+            class="px-4 py-2 text-sm rounded-md border border-gray-400 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            onclick="document.getElementById('editModal').classList.remove('hidden')">
+      Edit Post
+    </button>
+    <button type="button"
+            class="px-4 py-2 text-sm rounded-md border border-red-500 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+            onclick="document.getElementById('deleteModal').classList.remove('hidden')">
+      Delete Post
+    </button>
+  </div>
+{% endif %}
+
+
+
+## Edit Post Modal
+<!-- Edit Post Modal -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 hidden"
+     id="editModal">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg mx-4">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+      <h5 class="text-lg font-semibold text-gray-900 dark:text-white">Edit Post</h5>
+      <button type="button"
+              class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-xl leading-none"
+              onclick="document.getElementById('editModal').classList.add('hidden')"
+              aria-label="Close">&times;</button>
+    </div>
+    <form id="editPostForm">
+      <div class="px-6 py-4 space-y-4">
+        <input type="hidden" name="post_id" value="{{ post.id }}">
+        <div>
+          <label for="editTitle" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+          <input type="text"
+                 class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                 id="editTitle" name="title" value="{{ post.title }}" required>
+        </div>
+        <div>
+          <label for="editContent" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content</label>
+          <textarea class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    id="editContent" name="content" rows="5" required>{{ post.content }}</textarea>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+        <button type="button"
+                class="px-4 py-2 text-sm rounded-md border border-gray-400 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                onclick="document.getElementById('editModal').classList.add('hidden')">
+          Cancel
+        </button>
+        <button type="submit"
+                class="px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+          Save Changes
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
+## Delete Confirmation Modal
+<!-- Delete Confirmation Modal -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 hidden"
+     id="deleteModal">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg mx-4">
+    <div class="flex items-center justify-between px-6 py-4 bg-red-600 rounded-t-lg">
+      <h5 class="text-lg font-semibold text-white">Delete Post?</h5>
+      <button type="button"
+              class="text-white hover:text-red-200 text-xl leading-none"
+              onclick="document.getElementById('deleteModal').classList.add('hidden')"
+              aria-label="Close">&times;</button>
+    </div>
+    <div class="px-6 py-4">
+      <p class="text-base text-gray-800 dark:text-gray-200">
+        Are you sure you want to delete this post? This action cannot be undone.
+      </p>
+    </div>
+    <div class="flex justify-end gap-2 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+      <button type="button"
+              class="px-4 py-2 text-sm rounded-md border border-gray-400 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              onclick="document.getElementById('deleteModal').classList.add('hidden')">
+        Cancel
+      </button>
+      <button type="button"
+              class="px-4 py-2 text-sm rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors"
+              id="confirmDelete">
+        Delete
+      </button>
+    </div>
+  </div>
+</div>
+
+
+
+## Edit/Delete JavaScript
+{% block scripts %}
+  <script type="module">
+    import {
+      getErrorMessage,
+      hideModal,
+      showModal,
+    } from "/static/js/utils.js";
+
+    // Get post ID from Jinja2 template
+    const postId = {{ post.id }};
+
+    // Edit Post Form Handler
+    const editForm = document.getElementById("editPostForm");
+    editForm.addEventListener("submit", async (event) => {
+      // Stop default form submission - we'll handle it with JavaScript
+      event.preventDefault();
+
+      // Gather form values into a plain object
+      const formData = new FormData(editForm);
+      const postData = Object.fromEntries(formData.entries());
+
+      // Remove post_id from data (it's in the URL, not the body)
+      delete postData.post_id;
+
+      try {
+        // PATCH for partial update (just title and content, not user_id)
+        const response = await fetch(`/api/posts/${postId}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(postData),
+        });
+
+        if (response.ok) {
+          document.getElementById("successMessage").textContent =
+            "Post updated successfully!";
+
+          hideModal("editModal");
+          showModal("successModal");
+
+          document
+            .getElementById("successModal")
+            .querySelector("button[onclick*='hidden']")
+            .addEventListener(
+              "click",
+              () => {
+                window.location.reload();
+              },
+              { once: true },
+            );
+        } else {
+          const error = await response.json();
+          document.getElementById("errorMessage").textContent =
+            getErrorMessage(error);
+
+          hideModal("editModal");
+          showModal("errorModal");
+        }
+      } catch (error) {
+        document.getElementById("errorMessage").textContent =
+          "Network error. Please check your connection and try again.";
+        showModal("errorModal");
+      }
+    });
+
+    // Delete Post Handler - listen for click on delete button
+    const deleteButton = document.getElementById("confirmDelete");
+    deleteButton.addEventListener("click", async () => {
+      try {
+        // DELETE request - no body needed, post_id is in the URL
+        const response = await fetch(`/api/posts/${postId}`, {
+          method: "DELETE",
+        });
+
+        // 204 = No Content (success)
+        if (response.status === 204) {
+          // Post is gone, redirect to home page
+          window.location.href = "/";
+        } else {
+          const error = await response.json();
+          document.getElementById("errorMessage").textContent =
+            getErrorMessage(error);
+
+          hideModal("deleteModal");
+          showModal("errorModal");
+        }
+      } catch (error) {
+        document.getElementById("errorMessage").textContent =
+          "Network error. Please check your connection and try again.";
+        showModal("errorModal");
+      }
+    });
+  </script>
+{% endblock scripts %}
