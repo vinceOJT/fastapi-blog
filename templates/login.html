@@ -1,77 +1,75 @@
 {% extends "layout.html" %}
 {% block content %}
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 py-6 px-8 mb-6">
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 py-6 px-8 mb-6">
     <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Login</h2>
     <form id="loginForm" class="space-y-4">
 
-      <div>
-        <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
-        <input type="email"
-               class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-               id="email" name="username" required>
-      </div>
+        <div>
+            <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+            <input type="email"
+                class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                id="email" name="username" required>
+        </div>
 
-      <div>
-        <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
-        <input type="password"
-               class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-               id="password" name="password" required>
-      </div>
+        <div>
+            <label for="password"
+                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
+            <input type="password"
+                class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                id="password" name="password" required>
+        </div>
 
-      <button type="submit"
-              class="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors">
-        Login
-      </button>
+        <button type="submit"
+            class="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors">
+            Login
+        </button>
 
     </form>
     <p class="mt-4 text-sm text-gray-600 dark:text-gray-400">
-      Don't have an account?
-      <a class="text-blue-600 dark:text-blue-400 hover:underline"
-         href="{{ url_for('register_page') }}">Register here</a>
+        Don't have an account?
+        <a class="text-blue-600 dark:text-blue-400 hover:underline" href="{{ url_for('register_page') }}">Register
+            here</a>
     </p>
-  </div>
+</div>
 {% endblock content %}
 
 {% block scripts %}
-  <script type="module">
+<script type="module">
     import { getErrorMessage, showModal } from '/static/js/utils.js';
 
     const loginForm = document.getElementById('loginForm');
 
     loginForm.addEventListener('submit', async (event) => {
-      event.preventDefault();
+        event.preventDefault();
 
-      const formData = new FormData(loginForm);
+        const formData = new FormData(loginForm);
 
-      try {
-        // OAuth2PasswordRequestForm expects form data, not JSON
-        const response = await fetch('/api/users/token', {
-          method: 'POST',
-          body: formData,
-        });
+        try {
+            // OAuth2PasswordRequestForm expects form data, not JSON
+            const response = await fetch('/api/users/token', {
+                method: 'POST',
+                body: formData,
+            });
 
-        if (response.ok) {
-          const data = await response.json();
-          localStorage.setItem('access_token', data.access_token);
+            if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem('access_token', data.access_token);
 
-          document.getElementById('successMessage').textContent = 'Login successful!';
-          showModal('successModal');
-
-          document.getElementById('successModal')
-            .querySelector("button[onclick*='hidden']")
-            .addEventListener('click', () => {
-              window.location.href = '/';
-            }, { once: true });
-        } else {
-          const error = await response.json();
-          document.getElementById('errorMessage').textContent = getErrorMessage(error);
-          showModal('errorModal');
+                document.getElementById('successMessage').textContent = 'Login successful!';
+                showModal('successModal');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1500);
+            } else {
+                const error = await response.json();
+                document.getElementById('errorMessage').textContent = getErrorMessage(error);
+                showModal('errorModal');
+            }
+        } catch (error) {
+            document.getElementById('errorMessage').textContent =
+                'Network error. Please check your connection and try again.';
+            showModal('errorModal');
         }
-      } catch (error) {
-        document.getElementById('errorMessage').textContent =
-          'Network error. Please check your connection and try again.';
-        showModal('errorModal');
-      }
     });
-  </script>
+</script>
 {% endblock scripts %}

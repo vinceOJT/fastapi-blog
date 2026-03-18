@@ -97,11 +97,9 @@
                 showModal('successModal');
 
                 // Redirect to login after closing success modal
-                document.getElementById('successModal')
-                    .querySelector("button[onclick*='hidden']")
-                    .addEventListener('click', () => {
-                        window.location.href = '/login';
-                    }, { once: true });
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 1500);
             } else {
                 const error = await response.json();
                 document.getElementById('errorMessage').textContent = getErrorMessage(error);
