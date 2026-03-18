@@ -9,8 +9,8 @@ from pwdlib import PasswordHash
 from config import settings
 
 
-password_hash = PasswordHash.recommmended()
-oauth2_scheme = OAuth2PasswordBearer(tokenURl="api/users/token")
+password_hash = PasswordHash.recommended()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users/token")
 
 
 def hash_password(password:str) -> str:
