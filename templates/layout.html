@@ -88,14 +88,11 @@
                             onclick="document.getElementById('createPostModal').classList.remove('hidden')">
                             New Post
                         </button>
-                        <span id="usernameDisplay" class="text-white text-sm md:mr-2"></span>
-                        <button
-                            class="border border-white text-white px-4 py-2 rounded-md hover:bg-white hover:text-gray-900 transition-colors duration-200 mb-2 md:mb-0 md:mr-3"
-                            type="button" id="logoutBtn">
-                            Logout
-                        </button>
+                        <a class="bg-white text-blue-600 px-4 py-2 rounded-md hover:bg-gray-100 transition-colors duration-200 mb-2 md:mb-0 md:mr-3 inline-block"
+                            href="{{ url_for('account_page') }}" id="accountBtn">
+                            Account
+                        </a>
                     </div>
-
                     <!-- Shown when logged out -->
                     <div id="loggedOutNav">
                         <a class="border border-white text-white px-4 py-2 rounded-md hover:bg-white hover:text-gray-900 transition-colors duration-200 mb-2 md:mb-0 md:mr-2 inline-block"
