@@ -59,8 +59,11 @@ class PostBase(BaseModel):
 
 # This class requires the code at the top because it'll access it's parameters when creating
 class PostCreate(PostBase):
-    user_id: int # TEMP TESTING
-        
+    
+    pass
+
+
+
 
 class PostUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=100)
