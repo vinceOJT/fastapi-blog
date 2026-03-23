@@ -144,7 +144,7 @@ async def update_user(user_id: int, user_update:UserUpdate,
     if user_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Unauthorize to edit this post"
+            detail="Unauthorize to edit this user"
         )
 
     
@@ -197,8 +197,15 @@ async def update_user(user_id: int, user_update:UserUpdate,
 
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_user(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
+async def delete_user(user_id: int, current_user:CurrentUser, db: Annotated[AsyncSession, Depends(get_db)]):
     result_to_be_deleted = await db.execute(select(models.User).where(models.User.id == user_id))
+
+    if user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Unauthorize to delete this user"
+        )
+    
     user = result_to_be_deleted.scalars().first()
     if not user:
         raise HTTPException(
