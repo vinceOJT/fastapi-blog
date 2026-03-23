@@ -73,27 +73,23 @@ async def get_post(post_id: int,     db: Annotated[AsyncSession, Depends(get_db)
 
 # Updates all fields title & content is a need to change else it'll have a default value when updating
 @router.put("/{post_id}", response_model=PostResponse)
-async def update_post_full(post_id: int, post_data:PostCreate,   db: Annotated[AsyncSession, Depends(get_db)]):
+async def update_post_full(post_id: int, post_data:PostCreate, current_user:CurrentUser,  db: Annotated[AsyncSession, Depends(get_db)]):
     result_post_id =    await db.execute(select(models.Post).where(models.Post.id == post_id))
     post = result_post_id.scalars().first()
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
     # Returns an error status code when a post doesn't exist
 
-    # If the author is being changed, verify the new user exists to maintain database integrity
-    if post_data.user_id != post.user_id:
-        result_user_id =    await db.execute(select(models.User).where(models.User.id == post_data.user_id))
-        user = result_user_id.scalars().first()
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found",
+
+    if post.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Unauthorize to edit this post"
         )
-    
+
     # Updates the current post with the latest post data
     post.title = post_data.title
     post.content = post_data.content
-    post.user_id = post_data.user_id
 
     await db.commit()
     await db.refresh(post,  attribute_names=["author"])
