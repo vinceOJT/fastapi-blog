@@ -138,7 +138,16 @@ async def get_user_posts(user_id: int, db: Annotated[AsyncSession, Depends(get_d
 
 
 @router.patch("/{user_id}", response_model=UserPrivate)
-async def update_user(user_id: int, user_update:UserUpdate, db: Annotated[AsyncSession, Depends(get_db)]):
+async def update_user(user_id: int, user_update:UserUpdate,
+                    current_user:CurrentUser, db: Annotated[AsyncSession,
+                    Depends(get_db)]):
+    if user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Unauthorize to edit this post"
+        )
+
+    
     result_user_id =await db.execute(
         select(models.User).where(models.User.id == user_id),
     )
