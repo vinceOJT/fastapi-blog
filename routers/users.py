@@ -271,10 +271,34 @@ async def upload_profile_picture(
 
 
 
+# Deleting old user profile pic
+@router.delete("/{user_id}/picture", response_model=UserPrivate)
+async def delete_user_picture(
+    user_id: int,
+    current_user: CurrentUser,
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    if current_user.id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to delete this user's picture",
+        )
 
+    old_filename = current_user.image_file
 
+    if old_filename is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No profile picture to delete",
+        )
 
+    current_user.image_file = None
+    await db.commit()
+    await db.refresh(current_user)
 
+    delete_profile_image(old_filename)
+
+    return current_user
 
 
 
