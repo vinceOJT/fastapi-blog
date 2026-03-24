@@ -201,7 +201,57 @@
 
 
 
+    uploadBtn.addEventListener('click', async () => {
+        const token = getToken();
+        if (!token) { window.location.href = '/login'; return; }
 
+        const file = pictureInput.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        uploadBtn.disabled = true;
+        uploadBtn.textContent = 'Uploading...';
+
+        try {
+            const response = await fetch(`/api/users/${currentUserId}/picture`, {
+                method: 'PATCH',
+                // Dont user content-type, browser sets multipart automatically
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData,
+            });
+
+            if (response.status === 401) { window.location.href = '/login'; return; }
+            if (response.status === 403) {
+                document.getElementById('errorMessage').textContent =
+                    'You are not authorized to update this profile picture.';
+                showModal('errorModal');
+                return;
+            }
+            if (response.ok) {
+                const data = await response.json();
+                clearUserCache();
+                document.getElementById('profileImage').src = data.image_path;
+                pictureInput.value = '';
+                imagePreview.classList.add('hidden');
+                document.getElementById('successMessage').textContent =
+                    'Profile picture updated successfully!';
+                showModal('successModal');
+            } else {
+                const error = await response.json();
+                document.getElementById('errorMessage').textContent = getErrorMessage(error);
+                showModal('errorModal');
+            }
+        } catch (error) {
+            document.getElementById('errorMessage').textContent =
+                'Network error. Please check your connection and try again.';
+            showModal('errorModal');
+        } finally {
+            uploadBtn.disabled = pictureInput.files.length === 0;
+            uploadBtn.textContent = 'Upload';
+        }
+    });
 
     const updateForm = document.getElementById('updateProfileForm');
     updateForm.addEventListener('submit', async (event) => {
