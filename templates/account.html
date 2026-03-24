@@ -39,14 +39,32 @@
 
     <hr class="border-gray-200 dark:border-gray-700 my-6">
 
-    <!-- Profile Picture Section (Placeholder) -->
+    <!-- Profile Picture Section -->
     <div class="mb-6">
-        <h5 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Profile Picture</h5>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">File upload coming in a future tutorial.</p>
-        <input type="file"
-            class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed"
-            disabled>
+        <h5 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Profile Picture</h5>
+
+        <!-- Preview container -->
+        <div class="mb-3">
+            <img id="imagePreview" class="hidden rounded-full object-cover border border-gray-200 dark:border-gray-600"
+                alt="Image preview" width="150" height="150">
+        </div>
+
+        <!-- File input and upload button -->
+        <div class="flex gap-2 items-start">
+            <input type="file"
+                class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                id="pictureInput" accept="image/*">
+            <button type="button"
+                class="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                id="uploadPictureBtn" disabled>
+                Upload
+            </button>
+        </div>
+        <small class="text-xs text-gray-500 dark:text-gray-400 mt-1 block">
+            Maximum file size: 5MB. Supported formats: JPEG, PNG, GIF, WebP.
+        </small>
     </div>
+
 
     <hr class="border-gray-200 dark:border-gray-700 my-6">
 
