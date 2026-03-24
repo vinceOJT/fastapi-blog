@@ -222,8 +222,13 @@ async def delete_user(user_id: int, current_user:CurrentUser, db: Annotated[Asyn
             detail="User not found",
         )
 
+    old_filename = user.image_file 
+
     await db.delete(user)
     await db.commit()
+
+    if old_filename:
+        delete_profile_image(old_filename)
 
 
 
