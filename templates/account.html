@@ -178,6 +178,31 @@
         document.getElementById('email').value = user.email;
     }
 
+    const pictureInput = document.getElementById('pictureInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const uploadBtn = document.getElementById('uploadPictureBtn');
+
+    pictureInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.src = e.target.result;
+                imagePreview.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+            uploadBtn.disabled = false;
+        } else {
+            imagePreview.classList.add('hidden');
+            uploadBtn.disabled = true;
+        }
+    });
+
+
+
+
+
+
     const updateForm = document.getElementById('updateProfileForm');
     updateForm.addEventListener('submit', async (event) => {
         event.preventDefault();
