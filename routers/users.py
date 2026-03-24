@@ -2,7 +2,7 @@
 from typing import Annotated
 
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -20,6 +20,15 @@ from fastapi.security import OAuth2PasswordRequestForm
 from auth import CurrentUser, create_access_token, hash_password,  verify_password
 
 from config import settings
+
+from PIL import UnidentifiedImageError
+
+from starlette.concurrency import run_in_threadpool
+
+from image_utils import delete_profile_image, process_profile_image
+
+
+
 
 router = APIRouter()
 
