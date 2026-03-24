@@ -196,8 +196,7 @@ async def update_user(user_id: int, user_update:UserUpdate,
         user.username = user_update.username
     if user_update.email is not None:
         user.email = user_update.email.lower()
-    if user_update.image_file is not None:
-            user.image_file = user_update.image_file
+
 
     await db.commit()
     await db.refresh(user)
